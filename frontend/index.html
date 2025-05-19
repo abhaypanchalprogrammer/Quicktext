@@ -1,0 +1,91 @@
+<!-- Save this as index.html -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QuickText Share</title>
+    <style>
+      body {
+        font-family: Arial;
+        background: #1e3c72;
+        color: white;
+        padding: 20px;
+        text-align: center;
+      }
+      .box {
+        max-width: 600px;
+        margin: auto;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 20px;
+        border-radius: 10px;
+      }
+      textarea,
+      input,
+      button {
+        width: 90%;
+        padding: 10px;
+        margin-top: 10px;
+        border-radius: 8px;
+      }
+      button {
+        background: #ff9800;
+        border: none;
+        color: white;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #e67e22;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="box">
+      <h2>🚀 QuickText Share</h2>
+      <textarea id="textInput" placeholder="Type your message..."></textarea>
+      <button onclick="generateCode()">Generate Code</button>
+      <div id="codeBox" style="display: none">
+        <p>Your Code: <span id="codeDisplay"></span></p>
+      </div>
+
+      <h3>Retrieve Text</h3>
+      <input type="text" id="codeInput" placeholder="Enter your code" />
+      <button onclick="retrieveText()">Retrieve</button>
+      <p id="retrievedText"></p>
+    </div>
+
+    <script>
+      const backendURL = "http://localhost:3000";
+
+      async function generateCode() {
+        const text = document.getElementById("textInput").value.trim();
+        if (!text) return alert("Enter some text!");
+
+        const res = await fetch(`${backendURL}/store`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text }),
+        });
+        const data = await res.json();
+        if (data.code) {
+          document.getElementById("codeDisplay").textContent = data.code;
+          document.getElementById("codeBox").style.display = "block";
+        }
+      }
+
+      async function retrieveText() {
+        const code = document.getElementById("codeInput").value.trim();
+        if (!code) return alert("Enter a code!");
+
+        const res = await fetch(`${backendURL}/retrieve/${code}`);
+        const data = await res.json();
+        if (data.text) {
+          document.getElementById("retrievedText").textContent = data.text;
+        } else {
+          alert("Code not found or expired.");
+          document.getElementById("retrievedText").textContent = "";
+        }
+      }
+    </script>
+  </body>
+</html>
